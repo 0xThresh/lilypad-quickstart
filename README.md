@@ -8,17 +8,3 @@ and generate an Alchemy API key, and run the commands below to add them to the P
 pulumi config set --secret Web3PrivateKey
 pulumi config set --secret AlchemyAPIKey
 ```
-
-Once the model is running, you can test that it's working by connecting to the instance in SSM
-and running this curl command: 
-```
-curl http://localhost:8000/v1/chat/completions \
-    -H "Content-Type: application/json" \
-    -d '{
-        "model": "<model>",
-        "messages": [
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": "What year was Python invented?"}
-        ]
-    }'
-```
