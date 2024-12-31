@@ -1,0 +1,11 @@
+name: lilypad-quickstart
+description: Lilypad Network EC2 instance quickstart
+runtime:
+  name: python
+  options:
+    toolchain: pip
+    virtualenv: venv
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: aws-python
