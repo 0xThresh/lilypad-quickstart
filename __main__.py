@@ -130,7 +130,7 @@ sudo chown -R $USER:$USER /app/data/ipfs
 # Initialize ipfs node
 ipfs init 
 # Start the ipfs node
-ipfs daemon
+ipfs daemon &
 
 # Install Bacalhau
 cd /tmp
@@ -209,8 +209,6 @@ sudo systemctl start lilypad-resource-provider
 
 # Start the Lilypad Resource Provider on Docker
 #docker run -d --gpus all -e WEB3_PRIVATE_KEY=$WEB3_PRIVATE_KEY -e WEB3_RPC_URL=$RPC --restart always ghcr.io/lilypad-tech/resource-provider:latest
-
-EOF
 """,
     root_block_device={
         "volume_size": 120,
