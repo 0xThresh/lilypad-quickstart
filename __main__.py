@@ -111,6 +111,7 @@ sudo nvidia-ctk runtime configure --runtime=docker --set-as-default
 sudo systemctl restart docker
 
 # Download the latest version of Kubo (go-ipfs):
+echo "DEBUG: SETTING UP KUBO"
 wget https://dist.ipfs.tech/kubo/v0.30.0/kubo_v0.30.0_linux-amd64.tar.gz
 # Extract the archive:
 tar -xvzf kubo_v0.30.0_linux-amd64.tar.gz
@@ -133,6 +134,7 @@ ipfs init
 ipfs daemon &
 
 # Install Bacalhau
+echo "DEBUG: INSTALLING BACALHAU"
 cd /tmp
 wget https://github.com/bacalhau-project/bacalhau/releases/download/v1.3.2/bacalhau_v1.3.2_linux_amd64.tar.gz
 tar xfv bacalhau_v1.3.2_linux_amd64.tar.gz
@@ -140,12 +142,13 @@ sudo mv bacalhau /usr/bin/bacalhau
 sudo chown -R $USER /app/data
 
 # Install Lilypad - remove logic to detect OSARCH and OSNAME since it messes up Pulumi userdata
-export OSARCH="amd64"
-export OSNAME="linux"
+echo "DEBUG: INSTALLING LILYPAD"
+export OSARCH=amd64
+export OSNAME=linux
 # Remove existing lilypad installation if it exists
 sudo rm -f /usr/local/bin/lilypad
 # Download the latest production build
-curl https://api.github.com/repos/lilypad-tech/lilypad/releases/latest | grep "browser_download_url.*lilypad-$OSNAME-$OSARCH-gpu" | cut -d : -f 2,3 | tr -d \" | wget -qi - -O lilypad
+curl https://api.github.com/repos/lilypad-tech/lilypad/releases/latest | grep "browser_download_url.*lilypad-$OSNAME-$OSARCH-gpu" | cut -d : -f 2,3 | tr -d \\" | wget -qi - -O lilypad
 # Make Lilypad executable and install it
 chmod +x lilypad
 sudo mv lilypad /usr/local/bin/lilypad
@@ -153,12 +156,14 @@ sudo mv lilypad /usr/local/bin/lilypad
 # Create env file
 sudo mkdir -p /app/lilypad
 sudo touch /app/lilypad/resource-provider-gpu.env
-sudo echo $WEB3_PRIVATE_KEY > /app/lilypad/resource-provider-gpu.env
+sudo echo WEB3_PRIVATE_KEY=$WEB3_PRIVATE_KEY > /app/lilypad/resource-provider-gpu.env
 
 # Set up Arbitrum RPC connection
-export RPC=wss://arb-sepolia.g.alchemy.com/v2/$ALCHEMY_API_KEY
+echo "DEBUG: SETTING UP ALCHEMY ENDPOINT"
+export RPC="wss://arb-sepolia.g.alchemy.com/v2/$ALCHEMY_API_KEY"
 
 # Set up the Bacalhau unit 
+echo "DEBUG: SET UP BACALHAU UNIT"
 cat << EOT > /etc/systemd/system/bacalhau.service
 [Unit]
 Description=Lilypad V2 Bacalhau
@@ -178,6 +183,7 @@ ExecStart=/usr/bin/bacalhau serve --node-type compute,requester --peer none --pr
 WantedBy=multi-user.target 
 EOT
 
+echo "DEBUG: SET UP LILYPAD UNIT"
 # Set up the Lilypad Resource Provider unit
 cat << EOT > /etc/systemd/system/lilypad-resource-provider.service
 [Unit]
@@ -200,10 +206,12 @@ WantedBy=multi-user.target
 EOT
 
 # Start Lilypad services
+echo "DEBUG: STARTING LILYPAD SERVICES"
 sudo systemctl daemon-reload
 sudo systemctl enable bacalhau
 sudo systemctl enable lilypad-resource-provider
 sudo systemctl start bacalhau
+echo "DEBUG: WAITING 30 SECONDS FOR BACALHAU BEFORE STARTING RP"
 sleep 30
 sudo systemctl start lilypad-resource-provider
 
